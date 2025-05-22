@@ -7,7 +7,10 @@ from dotenv import load_dotenv
 # Load environment variables from .env file
 load_dotenv()
 
-app = FastAPI()
+# --- Environment and API Configuration ---
+OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY")
+OPENROUTER_API_URL = os.getenv("OPENROUTER_API_URL")
+DEFAULT_MODEL =  os.getenv("DEFAULT_MODEL")
 
 # --- Pydantic Models ---
 class ChatMessage(BaseModel):
@@ -17,12 +20,8 @@ class ChatResponse(BaseModel):
     reply: str | None = None
     error: str | None = None
 
-# --- Environment and API Configuration ---
-# OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY")
-OPENROUTER_API_KEY = None
-OPENROUTER_API_URL = "https://openrouter.ai/api/v1/chat/completions"
-# Default model, can be made configurable later if needed
-DEFAULT_MODEL = "openai/gpt-3.5-turbo" 
+# --- FastAPI ---
+app = FastAPI()
 
 # --- Root Endpoint ---
 @app.get("/")
