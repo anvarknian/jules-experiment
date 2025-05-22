@@ -1,0 +1,25 @@
+name: flutter_chat_app
+description: A new Flutter project for a chat application.
+
+publish_to: 'none' # Remove this line if you intend to publish to pub.dev
+
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.0.0 <4.0.0' # Adjusted to a recent stable SDK range
+
+dependencies:
+  flutter:
+    sdk: flutter
+  http: ^1.2.0 # For making HTTP requests
+  provider: ^6.1.2 # For state management
+
+  cupertino_icons: ^1.0.6
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^3.0.0
+
+flutter:
+  uses-material-design: true
