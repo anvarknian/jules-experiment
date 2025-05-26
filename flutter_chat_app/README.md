@@ -1,81 +1,68 @@
-# Flutter Chat Application
+# Flutter Frontend - Jules AI Chat Application
 
-This Flutter application provides a mobile chat interface that connects to a FastAPI backend to interact with the OpenRouter API.
+**Note:** The primary and recommended way to run this Flutter web application along with the entire application (backend, database) is by using Docker Compose. Please refer to the [main project README.md](../../README.md) for setup and execution instructions.
 
-## Prerequisites
+This document provides information specific to the Flutter frontend for development purposes.
 
--   **Flutter SDK:** Ensure you have Flutter installed. See [Flutter installation guide](https://flutter.dev/docs/get-started/install).
--   **FastAPI Backend Running:** This Flutter app requires the companion FastAPI backend to be running and accessible.
-    -   Follow the setup instructions in the main `README.md` of this repository to run the backend (it typically runs on `http://127.0.0.1:8000`).
+## Overview
 
-## Getting Started
+This Flutter application provides the web-based user interface for the Jules AI Chat Application. It communicates with the FastAPI backend to send messages and receive AI-generated replies.
 
-1.  **Navigate to the Flutter app directory:**
+## Accessing the Application
+
+When the application is running via `docker-compose up`, the Flutter web app is typically accessible at:
+
+*   `http://localhost:8080`
+
+## Backend URL Configuration
+
+*   When built and run via Docker Compose (as defined in `docker-compose.yml` and `flutter_chat_app/Dockerfile`), the `BACKEND_URL` is automatically passed to the Flutter build process using the `--dart-define` flag. It is set to `http://backend:8000`, which is the Docker network address for the backend service.
+*   For local development outside of Docker (see below), the application defaults to `http://localhost:8000`. This can be seen in `lib/src/services/api_service.dart`.
+
+## Technology Stack
+
+*   **Flutter SDK**: For building the cross-platform web application.
+*   **Dart**: Programming language for Flutter.
+*   **http package**: For making API calls to the backend.
+*   **Provider (or other state management)**: (Assumed, though not explicitly detailed in current files - good to mention if used).
+
+## Key Components (Illustrative)
+
+*   **`lib/main.dart`**: Entry point of the application, sets up the main app widget.
+*   **`lib/src/screens/chat_screen.dart`**: Main UI for displaying chat messages and input.
+*   **`lib/src/services/api_service.dart`**: Handles communication with the backend API.
+*   **`lib/src/widgets/message_bubble.dart`**: Widget for displaying individual chat messages.
+*   **`lib/src/models/chat_message.dart`**: Data model for chat messages (if used beyond simple strings).
+
+## Running Standalone (for Development - Not Recommended for Full App)
+
+While Docker Compose is the recommended way, if you need to run the Flutter frontend standalone for specific development or testing tasks (e.g., for faster UI iteration with hot reload):
+
+1.  **Ensure Flutter SDK is installed:** See [Flutter installation guide](https://flutter.dev/docs/get-started/install).
+2.  **Navigate to the Flutter app directory:**
     ```bash
     cd flutter_chat_app
     ```
-
-2.  **Get Flutter dependencies:**
+3.  **Get Flutter dependencies:**
     ```bash
     flutter pub get
     ```
-
-3.  **Configure Backend URL (if necessary):**
-    The application is configured by default to connect to the backend at `http://10.0.2.2:8000`. This is standard for Android emulators accessing the host machine's localhost.
-    -   **iOS Simulator:** If you are running on an iOS simulator, `http://localhost:8000` or `http://127.0.0.1:8000` should work.
-    -   **Physical Device:** If running on a physical Android or iOS device, you must use your computer's local network IP address (e.g., `http://192.168.1.X:8000`). Ensure your device is on the same Wi-Fi network as your computer and that your firewall allows connections to port 8000.
-
-    To change the URL, modify the `_baseUrl` constant in `lib/src/services/api_service.dart`:
-    ```dart
-    // lib/src/services/api_service.dart
-    // ...
-    static const String _baseUrl = 'http://YOUR_BACKEND_IP_OR_HOSTNAME:8000'; 
-    // ...
-    ```
-    Rebuild the app after changing the URL.
-
-4.  **Run the Application:**
-    -   Ensure an emulator is running or a device is connected.
-    -   Execute the following command:
+4.  **Ensure the backend service is running and accessible.**
+    *   You might run the backend via Docker Compose while working on the Flutter app standalone. In this case, the backend would be at `http://localhost:8000`.
+    *   The `api_service.dart` defaults to `http://localhost:8000` which should work if the backend is exposed on that port.
+5.  **Run the Application:**
+    *   For web:
         ```bash
-        flutter run
+        flutter run -d chrome 
         ```
-    -   For a release build, use `flutter run --release`.
+    *   Ensure an emulator is running or a device is connected if targeting mobile.
 
-## Manual Testing Checklist
+This setup is primarily for focused frontend development. For running the full application, always refer to the root `README.md`.
 
-Once the app is running and the FastAPI backend is active and accessible:
+## Building for Web Manually (Not needed for Docker setup)
 
-1.  **Launch the App:**
-    -   [ ] Does the app launch successfully?
-    -   [ ] Do you see the initial message "Connected to FastAPI backend! Send a message."?
-
-2.  **Send a Message (Happy Path):**
-    -   [ ] Type a message (e.g., "Hello") into the input field and press send.
-    -   [ ] Does your message appear in the chat list, styled as a user message?
-    -   [ ] Does a loading indicator appear briefly while waiting for the backend?
-    -   [ ] Does a response from the AI assistant appear shortly after, styled as an assistant message? (Requires a VALID `OPENROUTER_API_KEY` in the backend's `.env` file).
-
-3.  **Backend Not Running:**
-    -   Stop the FastAPI backend server.
-    -   [ ] Send a message from the app.
-    -   [ ] Does an error message appear in the chat UI (e.g., "Error: Failed to connect to the chat service...")?
-    -   Restart the backend server.
-
-4.  **Invalid Backend API Key (Simulated):**
-    -   If your backend's `OPENROUTER_API_KEY` is invalid or missing, the backend should return an error.
-    -   [ ] Send a message.
-    -   [ ] Does the app display an error message from the server (e.g., "Error: Error from server: Authentication error..." or "OpenRouter API key not configured.")?
-
-5.  **Input Validation:**
-    -   [ ] Try to send an empty message. Does the app prevent it or handle it gracefully? (Currently, the send button does nothing if the field is empty, which is acceptable).
-
-6.  **UI & Styling:**
-    -   [ ] Do chat bubbles look good on different length messages?
-    -   [ ] Is the text input area clear and usable?
-    -   [ ] Does scrolling work correctly, especially with many messages? Is the scrollbar visible?
-    -   [ ] If you change your device theme (light/dark), does the app's theme adapt?
-
-7.  **Loading State:**
-    -   [ ] Is the loading indicator clear when sending a message?
-    -   [ ] Is the input field and send button disabled during loading?
+If you wanted to build the web app manually without Docker:
+```bash
+flutter build web --release --dart-define=BACKEND_URL=http://your_backend_url:8000
+```
+The output would be in `build/web`. You would then need to serve these static files using a web server. The Docker setup handles this automatically with Nginx.

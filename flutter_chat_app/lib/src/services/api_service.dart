@@ -8,10 +8,16 @@ class ApiService {
   // For Android emulator, 10.0.2.2 typically maps to your host machine's localhost.
   // For iOS simulator, localhost or 127.0.0.1 should work.
   // If running on a physical device, use your machine's network IP.
-  static const String _baseUrl = 'http://10.0.2.2:8000'; // Common for Android emulator
+  // Use String.fromEnvironment to get the backend URL.
+  // The 'BACKEND_URL' will be passed during the Docker build.
+  static const String _baseUrl = String.fromEnvironment(
+    'BACKEND_URL',
+    defaultValue: 'http://localhost:8000', // Fallback for local development
+  );
 
   Future<String> sendMessage(String userMessage) async {
-    final Uri chatUri = Uri.parse('$_baseUrl/chat');
+    // The API endpoint is now /api/v1/chat as per backend main.py
+    final Uri chatUri = Uri.parse('$_baseUrl/api/v1/chat');
     
     try {
       final response = await http.post(
@@ -19,14 +25,19 @@ class ApiService {
         headers: <String, String>{
           'Content-Type': 'application/json; charset=UTF-8',
         },
-        body: jsonEncode(<String, String>{
+        body: jsonEncode(<String, dynamic>{ // Changed to dynamic for user_id and chat_id
           'message': userMessage,
+          // TODO: Implement actual user_id and chat_id management
+          'user_id': 1, // Placeholder user_id
+          'chat_id': null, // Placeholder chat_id (optional, backend creates new if null)
         }),
       );
 
       if (response.statusCode == 200) {
         final Map<String, dynamic> responseData = jsonDecode(response.body);
         if (responseData.containsKey('reply') && responseData['reply'] != null) {
+          // Optionally, you might want to use chat_id or message_ids from response
+          // String chatId = responseData['chat_id']?.toString() ?? '';
           return responseData['reply'] as String;
         } else if (responseData.containsKey('error') && responseData['error'] != null) {
           return Future.error('Error from server: ${responseData['error']}');

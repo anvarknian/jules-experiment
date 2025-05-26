@@ -2,3 +2,7 @@ fastapi
 uvicorn[standard]
 requests
 python-dotenv
+SQLAlchemy==1.4.50
+psycopg2-binary==2.9.9
+alembic==1.13.1
+python-dotenv==0.21.0

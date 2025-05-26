@@ -1,0 +1,41 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:13-alpine
+    environment:
+      POSTGRES_USER: jules_user
+      POSTGRES_PASSWORD: jules_password
+      POSTGRES_DB: chat_db
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    restart: unless-stopped
+
+  backend:
+    build: ./backend
+    environment:
+      DATABASE_URL: postgresql://jules_user:jules_password@postgres:5432/chat_db
+      OPENROUTER_API_KEY: YOUR_OPENROUTER_API_KEY_HERE
+      FASTAPI_ENV: development
+    depends_on:
+      - postgres
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend:/app
+    restart: unless-stopped
+
+  frontend:
+    build: ./flutter_chat_app
+    depends_on:
+      - backend
+    ports:
+      - "8080:80" # Maps container port 80 (Nginx) to host port 8080
+    restart: unless-stopped
+    # The BACKEND_URL environment variable for Flutter would ideally be passed during the Flutter build process.
+    # This might require modifications to the Flutter app's Dockerfile or the app itself
+    # to consume this variable at build time or runtime. For now, we assume the Flutter app
+    # will be configured to point to http://localhost:8000 or http://backend:8000 as appropriate.
+
+volumes:
+  postgres_data:
